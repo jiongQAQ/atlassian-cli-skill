@@ -1,10 +1,9 @@
 # atlassian-cli-skill
 
-一个基于 `atlassian-cli` 的 Agent Skill，用来在不启动 MCP server 的前提下，通过本地命令直接读写 Jira 和 Confluence。
+一个给 AI Agent 用的 Atlassian Skill。  
+它内部通过 `atlassian-cli` 调用 Jira 和 Confluence，但正常使用时不需要人手动去敲 CLI。
 
-这个仓库本身不是 CLI 实现；它依赖 `atlassian-cli`。  
-但这个 skill 已经把“检查 CLI 是否存在、缺失时自动安装”的逻辑封装进脚本里了。  
-Skill 负责把常见工作流封装好，例如：
+这个 skill 负责把常见工作流封装好，例如：
 
 - 读取 Jira issue / Confluence 页面
 - 搜索 Jira / Confluence
@@ -27,8 +26,7 @@ Skill 负责把常见工作流封装好，例如：
         └── confluence_markdown_page.py
 ```
 
-真正的 Skill 内容在 `atlassian-cli-skill/` 目录下。  
-如果要安装到本地 skills 目录，复制这个子目录即可。
+真正的 skill 内容在 `atlassian-cli-skill/` 目录下。
 
 ## 前置条件
 
@@ -87,30 +85,7 @@ ln -s "$(pwd)/atlassian-cli-skill" ~/.codex/skills/atlassian-cli-skill
 
 安装后重启 Claude / Codex，使 skill 被重新发现。
 
-### 2. 自动安装 `atlassian-cli`
-
-第一次运行 skill 时，优先通过下面这个脚本进入：
-
-```bash
-./atlassian-cli-skill/scripts/run_atlassian_cli.sh --help
-```
-
-如果本机还没有 `atlassian-cli`，脚本会自动调用：
-
-```bash
-uv tool install --force git+https://github.com/jiongQAQ/cli-atlassian
-```
-
-所以通常不需要手动先装 CLI。  
-前提是本机已经安装了 `uv`。
-
-如果你更愿意手动安装，也可以直接执行：
-
-```bash
-uv tool install git+https://github.com/jiongQAQ/cli-atlassian
-```
-
-### 3. 准备环境变量
+### 2. 准备环境变量
 
 推荐把认证信息放进 `~/.atlassian-cli.env`，不要直接写进命令行。
 
@@ -151,58 +126,21 @@ fi
 使用 $atlassian-cli-skill 搜索 Jira 里 project = DEMO 最近 20 条更新
 ```
 
-### 2. 直接运行 Skill 自带脚本
+### 2. Skill 内部做了什么
 
-先让 skill 自动检查并安装 CLI：
+你不需要手动运行 `atlassian-cli`。  
+当 AI 使用这个 skill 时，它会：
 
-```bash
-./atlassian-cli-skill/scripts/run_atlassian_cli.sh --help
-```
+- 检查本机是否已经安装 `atlassian-cli`
+- 如果缺失，则自动通过 `uv` 安装 `cli-atlassian`
+- 读取 `~/.atlassian-cli.env`
+- 用本地 CLI 去执行 Jira / Confluence 的真实读写操作
+- 在需要时，用内置脚本把本地 Markdown 转成 Confluence 页面更新命令
 
-读取 Confluence 页面：
+所以从使用者视角，重点只有两件事：
 
-```bash
-./atlassian-cli-skill/scripts/run_atlassian_cli.sh confluence page get 123456 --json
-```
-
-搜索 Jira issue：
-
-```bash
-./atlassian-cli-skill/scripts/run_atlassian_cli.sh jira issue search \
-  --jql 'project = DEMO ORDER BY updated DESC' \
-  --json
-```
-
-从 Markdown 更新 Confluence 页面：
-
-```bash
-python3 ./atlassian-cli-skill/scripts/confluence_markdown_page.py \
-  update 123456 ./design.md --json
-```
-
-从 Markdown 创建 Confluence 页面：
-
-```bash
-python3 ./atlassian-cli-skill/scripts/confluence_markdown_page.py \
-  create ./design.md --space-key DOC --parent-id 10000 --json
-```
-
-## Markdown 同步脚本行为
-
-`confluence_markdown_page.py` 做了几件事：
-
-- 读取本地 Markdown 文件
-- 如果没有传 `--title`，就取第一个 H1 作为页面标题
-- 把第一个 H1 从正文里去掉，避免页面标题和正文标题重复
-- 调用 `atlassian-cli confluence page create/update`
-- 支持 `--dry-run`，先只打印最终命令，不真正写入
-
-示例：
-
-```bash
-python3 ./atlassian-cli-skill/scripts/confluence_markdown_page.py \
-  update 123456 ./design.md --dry-run
-```
+- 装好 skill
+- 配好 `~/.atlassian-cli.env`
 
 ## 适用场景
 
@@ -210,10 +148,9 @@ python3 ./atlassian-cli-skill/scripts/confluence_markdown_page.py \
 
 - 想通过“安装 skill”的方式直接获得 Jira / Confluence 操作能力
 - 希望 skill 首次运行时自动补装 `atlassian-cli`
-- 已经有 `atlassian-cli`，想给 Claude / Codex 再加一层可复用工作流
 - 不想启动 `mcp-atlassian` server
-- 想直接通过本地命令访问 Jira / Confluence
-- 想把“本地 Markdown -> Confluence 页面”固定成一个稳定流程
+- 想让 AI 直接去读写 Jira / Confluence
+- 想把“本地 Markdown -> Confluence 页面”固定成一个 AI 可复用流程
 
 ## 安全说明
 
