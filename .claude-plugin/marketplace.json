@@ -1,0 +1,27 @@
+{
+  "name": "jiongqaq-tools",
+  "owner": {
+    "name": "jiongQAQ"
+  },
+  "metadata": {
+    "description": "Community marketplace for Claude Code plugins maintained in the jiongQAQ repositories."
+  },
+  "plugins": [
+    {
+      "name": "atlassian-cli-skill",
+      "source": "./plugins/atlassian-cli-skill",
+      "description": "Confluence operations through the local atlassian-cli backend.",
+      "author": {
+        "name": "jiongQAQ"
+      },
+      "homepage": "https://github.com/jiongQAQ/atlassian-cli-skill",
+      "repository": "https://github.com/jiongQAQ/atlassian-cli-skill",
+      "category": "productivity",
+      "tags": [
+        "confluence",
+        "atlassian",
+        "documentation"
+      ]
+    }
+  ]
+}

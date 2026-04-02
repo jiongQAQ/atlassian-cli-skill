@@ -1,0 +1,18 @@
+{
+  "name": "atlassian-cli-skill",
+  "version": "1.0.0",
+  "description": "Operate Confluence pages from Claude Code through the local atlassian-cli backend.",
+  "author": {
+    "name": "jiongQAQ",
+    "url": "https://github.com/jiongQAQ"
+  },
+  "homepage": "https://github.com/jiongQAQ/atlassian-cli-skill",
+  "repository": "https://github.com/jiongQAQ/atlassian-cli-skill",
+  "keywords": [
+    "confluence",
+    "atlassian",
+    "documentation",
+    "claude-code-plugin"
+  ],
+  "skills": "./skills/"
+}

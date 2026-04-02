@@ -1,126 +1,77 @@
 # atlassian-cli-skill
 
-`atlassian-cli-skill` is a reusable skill package for AI agents that need to operate Confluence from the terminal.
+`atlassian-cli-skill` is a Claude Code plugin for Confluence operations.
 
-This repository distributes one installable skill directory, `atlassian-cli-skill/`. The skill uses the local `atlassian-cli` command as its execution backend and can bootstrap that CLI automatically on first use.
+The plugin installs a Confluence-focused skill that uses the local `atlassian-cli` command as its execution backend. On first use, it can bootstrap `atlassian-cli` automatically.
 
-## What It Does
-
-After installation, the skill can help an AI agent:
+## Features
 
 - read a Confluence page
 - search Confluence pages
 - create a Confluence page from Markdown
 - update an existing Confluence page from Markdown
 
-This repository does not package an MCP server. The skill is intended for environments that support local skills, such as Claude Code or Codex-compatible setups.
-
-## Repository Layout
-
-```text
-.
-├── README.md
-└── atlassian-cli-skill/
-    ├── SKILL.md
-    ├── agents/openai.yaml
-    ├── assets/.atlassian-cli.env.example
-    └── scripts/
-        ├── ensure_atlassian_cli.sh
-        ├── run_atlassian_cli.sh
-        └── confluence_markdown_page.py
-```
-
-The actual skill content lives in `atlassian-cli-skill/`.
-
-## Requirements
-
-- a skill-capable agent environment, such as Claude Code or Codex
-- `uv` available on `PATH`
-- a working Confluence account and API credential
-
 ## Installation
 
-### Install with `skill-installer`
+This repository is published as a Claude Code plugin marketplace.
 
-Install to `~/.claude/skills`:
+### 1. Add the marketplace
 
-```bash
-python3 ~/.claude/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo jiongQAQ/atlassian-cli-skill \
-  --path atlassian-cli-skill \
-  --dest ~/.claude/skills
+```text
+/plugin marketplace add jiongQAQ/atlassian-cli-skill
 ```
 
-Install to `~/.codex/skills`:
+### 2. Install the plugin
 
-```bash
-python3 ~/.claude/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo jiongQAQ/atlassian-cli-skill \
-  --path atlassian-cli-skill \
-  --dest ~/.codex/skills
+```text
+/plugin install atlassian-cli-skill@jiongqaq-tools
 ```
 
-### Install manually
-
-Copy:
+You can also use the CLI form:
 
 ```bash
-cp -R ./atlassian-cli-skill ~/.claude/skills/
-cp -R ./atlassian-cli-skill ~/.codex/skills/
+claude plugin marketplace add jiongQAQ/atlassian-cli-skill
+claude plugin install atlassian-cli-skill@jiongqaq-tools
 ```
-
-Or symlink:
-
-```bash
-ln -s "$(pwd)/atlassian-cli-skill" ~/.claude/skills/atlassian-cli-skill
-ln -s "$(pwd)/atlassian-cli-skill" ~/.codex/skills/atlassian-cli-skill
-```
-
-Restart the agent after installation so the skill can be discovered again.
 
 ## Configuration
 
 Copy the example environment file:
 
 ```bash
-cp ./atlassian-cli-skill/assets/.atlassian-cli.env.example ~/.atlassian-cli.env
+curl -fsSL https://raw.githubusercontent.com/jiongQAQ/atlassian-cli-skill/main/plugins/atlassian-cli-skill/skills/confluence/assets/.atlassian-cli.env.example -o ~/.atlassian-cli.env
 chmod 600 ~/.atlassian-cli.env
 ```
 
-Then fill in the required values.
+If you already cloned this repository, you can also copy the file directly:
 
-### Required variables
+```bash
+cp ./plugins/atlassian-cli-skill/skills/confluence/assets/.atlassian-cli.env.example ~/.atlassian-cli.env
+chmod 600 ~/.atlassian-cli.env
+```
+
+Fill in the required values:
 
 - `CONFLUENCE_URL`
-  The base URL of your Confluence instance. This is usually visible in the browser address bar.
 - `CONFLUENCE_SSL_VERIFY`
-  Set to `"true"` by default. Set to `"false"` only if your environment uses self-signed or otherwise untrusted certificates.
 
-### Cloud authentication
+For Atlassian Cloud:
 
 - `CONFLUENCE_USERNAME`
-  Your Atlassian account email.
 - `CONFLUENCE_API_TOKEN`
-  Your Atlassian Cloud API token.
 
 Token creation guide:
 - <https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/>
 
-### Server / Data Center authentication
+For Server / Data Center:
 
 - `CONFLUENCE_PERSONAL_TOKEN`
-  A Confluence personal access token from your profile or personal settings.
 
-If your instance does not show a personal access token entry, ask the administrator whether PAT is enabled.
-
-### Optional compatibility alias
+Optional alias:
 
 - `CONFLUENCE_TOKEN`
-  Supported as an alias for `CONFLUENCE_API_TOKEN`.
 
-### Optional shell auto-load
-
-To load the file automatically in new shells:
+Optional shell auto-load:
 
 ```bash
 if [ -f "$HOME/.atlassian-cli.env" ]; then
@@ -130,27 +81,40 @@ fi
 
 ## Usage
 
-Use the skill explicitly in the agent prompt:
+After installation, ask Claude Code to use the plugin skill:
 
 ```text
-使用 $atlassian-cli-skill 读取 pageId=544882063 的 Confluence 页面
-使用 $atlassian-cli-skill 搜索标题里包含“接口设计”的 Confluence 页面
-使用 $atlassian-cli-skill 把本地 design.md 更新到 Confluence 页面 544882063
+使用 /atlassian-cli-skill:confluence 读取 pageId=544882063 的 Confluence 页面
+使用 /atlassian-cli-skill:confluence 搜索标题里包含“接口设计”的 Confluence 页面
+使用 /atlassian-cli-skill:confluence 把本地 design.md 更新到 Confluence 页面 544882063
 ```
 
-On first use, the skill:
+The plugin is limited to Confluence operations.
 
-1. checks whether `atlassian-cli` is installed
-2. installs it through `uv` if needed
-3. loads `~/.atlassian-cli.env`
-4. executes the Confluence operation through the local CLI
+## Repository Layout
 
-## Scope
+```text
+.
+├── .claude-plugin/marketplace.json
+├── plugins/
+│   └── atlassian-cli-skill/
+│       ├── .claude-plugin/plugin.json
+│       └── skills/confluence/
+└── atlassian-cli-skill/
+```
 
-This skill is intentionally limited to Confluence.
+- `.claude-plugin/marketplace.json` defines the marketplace catalog.
+- `plugins/atlassian-cli-skill/` contains the installable Claude Code plugin.
+- `atlassian-cli-skill/` is the legacy standalone skill layout retained for compatibility.
 
-- the skill expects credentials to be managed outside the repository
-- the public repository only contains placeholder configuration values
+## Validation
+
+Validate the marketplace or plugin locally:
+
+```bash
+claude plugin validate .
+claude plugin validate ./plugins/atlassian-cli-skill
+```
 
 ## Related Project
 
