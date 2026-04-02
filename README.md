@@ -1,77 +1,89 @@
 # atlassian-cli-skill
 
-`atlassian-cli-skill` is a Claude Code plugin for Confluence operations.
+`atlassian-cli-skill` 是一个面向 Claude Code 的 Confluence 插件。
 
-The plugin installs a Confluence-focused skill that uses the local `atlassian-cli` command as its execution backend. On first use, it can bootstrap `atlassian-cli` automatically.
+它安装后会提供一个只处理 Confluence 的 skill，底层通过本地 `atlassian-cli` 执行真实操作。首次使用时，如果机器上还没有安装 `atlassian-cli`，插件会自动尝试补装。
 
-## Features
+## 功能
 
-- read a Confluence page
-- search Confluence pages
-- create a Confluence page from Markdown
-- update an existing Confluence page from Markdown
+- 读取 Confluence 页面
+- 搜索 Confluence 页面
+- 从 Markdown 创建 Confluence 页面
+- 用 Markdown 更新已有 Confluence 页面
 
-## Installation
+## 安装
 
-This repository is published as a Claude Code plugin marketplace.
+这个仓库按 Claude Code plugin marketplace 的方式分发。
 
-### 1. Add the marketplace
+### 1. 添加 marketplace
 
 ```text
 /plugin marketplace add jiongQAQ/atlassian-cli-skill
 ```
 
-### 2. Install the plugin
+### 2. 安装插件
 
 ```text
 /plugin install atlassian-cli-skill@jiongqaq-tools
 ```
 
-You can also use the CLI form:
+也可以使用命令行：
 
 ```bash
 claude plugin marketplace add jiongQAQ/atlassian-cli-skill
 claude plugin install atlassian-cli-skill@jiongqaq-tools
 ```
 
-## Configuration
+## 配置
 
-Copy the example environment file:
+先复制示例环境文件：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jiongQAQ/atlassian-cli-skill/main/plugins/atlassian-cli-skill/skills/confluence/assets/.atlassian-cli.env.example -o ~/.atlassian-cli.env
 chmod 600 ~/.atlassian-cli.env
 ```
 
-If you already cloned this repository, you can also copy the file directly:
+如果你已经克隆了仓库，也可以直接从本地复制：
 
 ```bash
 cp ./plugins/atlassian-cli-skill/skills/confluence/assets/.atlassian-cli.env.example ~/.atlassian-cli.env
 chmod 600 ~/.atlassian-cli.env
 ```
 
-Fill in the required values:
+然后按实际环境填写变量。
+
+### 必填项
 
 - `CONFLUENCE_URL`
+  Confluence 根地址。一般可以直接从浏览器地址栏获取。
 - `CONFLUENCE_SSL_VERIFY`
+  默认填 `"true"`。如果你的环境使用自签名证书或证书链不完整，再改成 `"false"`。
 
-For Atlassian Cloud:
+### Atlassian Cloud
 
 - `CONFLUENCE_USERNAME`
+  你的 Atlassian 账号邮箱。
 - `CONFLUENCE_API_TOKEN`
+  你的 Atlassian Cloud API Token。
 
-Token creation guide:
+API Token 获取说明：
 - <https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/>
 
-For Server / Data Center:
+### Server / Data Center
 
 - `CONFLUENCE_PERSONAL_TOKEN`
+  Confluence 的 Personal Access Token。
 
-Optional alias:
+如果界面里没有 `Personal access tokens` 入口，需要让管理员确认实例是否启用了 PAT。
+
+### 可选兼容别名
 
 - `CONFLUENCE_TOKEN`
+  可作为 `CONFLUENCE_API_TOKEN` 的别名。
 
-Optional shell auto-load:
+### 可选 shell 自动加载
+
+如果希望每次打开终端自动加载环境变量，可以把这段加入 `~/.zshrc` 或 `~/.bashrc`：
 
 ```bash
 if [ -f "$HOME/.atlassian-cli.env" ]; then
@@ -79,9 +91,9 @@ if [ -f "$HOME/.atlassian-cli.env" ]; then
 fi
 ```
 
-## Usage
+## 使用方式
 
-After installation, ask Claude Code to use the plugin skill:
+安装完成后，可以直接在 Claude Code 里显式调用这个插件提供的 skill：
 
 ```text
 使用 /atlassian-cli-skill:confluence 读取 pageId=544882063 的 Confluence 页面
@@ -89,9 +101,9 @@ After installation, ask Claude Code to use the plugin skill:
 使用 /atlassian-cli-skill:confluence 把本地 design.md 更新到 Confluence 页面 544882063
 ```
 
-The plugin is limited to Confluence operations.
+这个插件只支持 Confluence，不包含 Jira 能力。
 
-## Repository Layout
+## 仓库结构
 
 ```text
 .
@@ -103,19 +115,19 @@ The plugin is limited to Confluence operations.
 └── atlassian-cli-skill/
 ```
 
-- `.claude-plugin/marketplace.json` defines the marketplace catalog.
-- `plugins/atlassian-cli-skill/` contains the installable Claude Code plugin.
-- `atlassian-cli-skill/` is the legacy standalone skill layout retained for compatibility.
+- `.claude-plugin/marketplace.json`：marketplace 目录文件
+- `plugins/atlassian-cli-skill/`：真正可安装的 Claude Code plugin
+- `atlassian-cli-skill/`：保留的旧版 standalone skill 目录，用于兼容之前的安装方式
 
-## Validation
+## 校验
 
-Validate the marketplace or plugin locally:
+本地可以用下面两条命令检查 marketplace 和 plugin 结构是否正确：
 
 ```bash
 claude plugin validate .
 claude plugin validate ./plugins/atlassian-cli-skill
 ```
 
-## Related Project
+## 相关项目
 
-- CLI backend: <https://github.com/jiongQAQ/cli-atlassian>
+- CLI 后端：<https://github.com/jiongQAQ/cli-atlassian>
