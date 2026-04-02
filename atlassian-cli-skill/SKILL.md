@@ -8,12 +8,13 @@ description: Use the local `atlassian-cli` command to read, search, create, upda
 ## Overview
 
 Use the installed `atlassian-cli` as the execution backend.
-Prefer the bundled wrapper script so the skill can reuse `~/.atlassian-cli.env` without repeating environment variables in every command.
+Prefer the bundled wrapper script so the skill can bootstrap `atlassian-cli` when missing and reuse `~/.atlassian-cli.env` without repeating environment variables in every command.
 
 ## Preconditions
 
-- Confirm `atlassian-cli` is installed and on `PATH`.
 - Prefer running `scripts/run_atlassian_cli.sh --help` before the first live operation in a fresh shell.
+- If `atlassian-cli` is missing, let `scripts/ensure_atlassian_cli.sh` install it through `uv`.
+- Keep `uv` available on `PATH` for first-time bootstrap.
 - Expect credentials to come from `~/.atlassian-cli.env` unless the current shell already exports the same variables.
 - Use `--json` whenever the result needs to be parsed or summarized.
 
@@ -21,8 +22,9 @@ Prefer the bundled wrapper script so the skill can reuse `~/.atlassian-cli.env` 
 
 1. Start with `scripts/run_atlassian_cli.sh ...` for direct Jira or Confluence operations.
 2. Use raw `atlassian-cli ...` only when the shell is already configured and there is no benefit from the wrapper.
-3. Prefer `scripts/confluence_markdown_page.py` when updating or creating a Confluence page from a local Markdown file because it derives the page title from the first H1 and strips the duplicate H1 from the body.
-4. Read back the target issue or page after a write operation when correctness matters.
+3. Let `scripts/run_atlassian_cli.sh` handle CLI bootstrap and environment loading before the actual command runs.
+4. Prefer `scripts/confluence_markdown_page.py` when updating or creating a Confluence page from a local Markdown file because it derives the page title from the first H1 and strips the duplicate H1 from the body.
+5. Read back the target issue or page after a write operation when correctness matters.
 
 ## Jira Operations
 
@@ -93,5 +95,6 @@ python3 scripts/confluence_markdown_page.py update 544882063 ./design.md --dry-r
 
 ## Resources
 
+- `scripts/ensure_atlassian_cli.sh`: Install `atlassian-cli` automatically through `uv` when the command is missing.
 - `scripts/run_atlassian_cli.sh`: Load `~/.atlassian-cli.env` if present, then execute `atlassian-cli`.
 - `scripts/confluence_markdown_page.py`: Create or update a Confluence page from Markdown with title extraction and H1 stripping.

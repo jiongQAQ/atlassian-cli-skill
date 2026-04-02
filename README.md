@@ -2,7 +2,8 @@
 
 一个基于 `atlassian-cli` 的 Agent Skill，用来在不启动 MCP server 的前提下，通过本地命令直接读写 Jira 和 Confluence。
 
-这个仓库本身不是 CLI 实现；它依赖已经安装好的 `atlassian-cli`。  
+这个仓库本身不是 CLI 实现；它依赖 `atlassian-cli`。  
+但这个 skill 已经把“检查 CLI 是否存在、缺失时自动安装”的逻辑封装进脚本里了。  
 Skill 负责把常见工作流封装好，例如：
 
 - 读取 Jira issue / Confluence 页面
@@ -20,6 +21,7 @@ Skill 负责把常见工作流封装好，例如：
     ├── SKILL.md
     ├── agents/openai.yaml
     └── scripts/
+        ├── ensure_atlassian_cli.sh
         ├── run_atlassian_cli.sh
         └── confluence_markdown_page.py
 ```
@@ -29,21 +31,48 @@ Skill 负责把常见工作流封装好，例如：
 
 ## 前置条件
 
-### 1. 安装 `atlassian-cli`
+### 1. 安装 Skill
 
-推荐直接安装公开仓库版本：
+如果你在 Codex 里使用 `skill-installer`，可以直接从 GitHub 安装这个 skill：
+
+```bash
+python /path/to/skill-installer/scripts/install-skill-from-github.py \
+  --repo jiongQAQ/atlassian-cli-skill \
+  --path atlassian-cli-skill
+```
+
+或者手动复制：
+
+```bash
+cp -R ./atlassian-cli-skill ~/.claude/skills/
+```
+
+安装后重启你的 Agent，使 skill 被重新发现。
+
+### 2. 自动安装 `atlassian-cli`
+
+第一次运行 skill 时，优先通过下面这个脚本进入：
+
+```bash
+./atlassian-cli-skill/scripts/run_atlassian_cli.sh --help
+```
+
+如果本机还没有 `atlassian-cli`，脚本会自动调用：
+
+```bash
+uv tool install --force git+https://github.com/jiongQAQ/cli-atlassian
+```
+
+所以通常不需要手动先装 CLI。  
+前提是本机已经安装了 `uv`。
+
+如果你更愿意手动安装，也可以直接执行：
 
 ```bash
 uv tool install git+https://github.com/jiongQAQ/cli-atlassian
 ```
 
-安装后验证：
-
-```bash
-atlassian-cli --help
-```
-
-### 2. 准备环境变量
+### 3. 准备环境变量
 
 推荐把认证信息放进 `~/.atlassian-cli.env`，不要直接写进命令行。
 
@@ -64,28 +93,6 @@ if [ -f "$HOME/.atlassian-cli.env" ]; then
 fi
 ```
 
-## 安装 Skill
-
-### Claude / Codex 本地 skills 目录
-
-把 `atlassian-cli-skill/` 目录复制到你的 skills 目录中，例如：
-
-```bash
-cp -R ./atlassian-cli-skill ~/.claude/skills/
-```
-
-如果你同时给 Codex 用，也可以放到：
-
-```bash
-cp -R ./atlassian-cli-skill ~/.codex/skills/
-```
-
-或者直接做软链：
-
-```bash
-ln -s "$(pwd)/atlassian-cli-skill" ~/.claude/skills/atlassian-cli-skill
-```
-
 ## 如何使用
 
 ### 1. 在 Agent 中显式调用 Skill
@@ -93,12 +100,18 @@ ln -s "$(pwd)/atlassian-cli-skill" ~/.claude/skills/atlassian-cli-skill
 直接在提示词中引用：
 
 ```text
-使用 $atlassian-cli-skill 读取某个 Confluence 页面
+使用 $atlassian-cli-skill 去操作 Confluence 页面
 使用 $atlassian-cli-skill 把本地 Markdown 更新到指定 Confluence 页面
 使用 $atlassian-cli-skill 搜索 Jira 中最近更新的 issue
 ```
 
 ### 2. 直接运行 Skill 自带脚本
+
+先让 skill 自动检查并安装 CLI：
+
+```bash
+./atlassian-cli-skill/scripts/run_atlassian_cli.sh --help
+```
 
 读取 Confluence 页面：
 
@@ -149,6 +162,8 @@ python3 ./atlassian-cli-skill/scripts/confluence_markdown_page.py \
 
 适合下面这些情况：
 
+- 想通过“安装 skill”的方式直接获得 Jira / Confluence 操作能力
+- 希望 skill 首次运行时自动补装 `atlassian-cli`
 - 已经有 `atlassian-cli`，想给 Claude / Codex 再加一层可复用工作流
 - 不想启动 `mcp-atlassian` server
 - 想直接通过本地命令访问 Jira / Confluence
