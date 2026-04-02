@@ -98,6 +98,68 @@ chmod 600 ~/.atlassian-cli.env
 
 然后按你的实际环境填写。
 
+#### 这些字段分别填什么
+
+**Jira / Confluence 地址**
+
+- `JIRA_URL`
+  填你的 Jira 根地址。
+  Cloud 一般是 `https://your-domain.atlassian.net`
+  Server / Data Center 一般是你公司自己的 Jira 地址，例如 `https://jira.example.com`
+- `CONFLUENCE_URL`
+  填你的 Confluence 根地址。
+  Cloud 一般是 `https://your-domain.atlassian.net/wiki`
+  Server / Data Center 一般是你公司自己的 Confluence 地址，例如 `https://wiki.example.com`
+
+这两个值通常直接从浏览器地址栏就能拿到。
+
+**Cloud 认证字段**
+
+- `JIRA_USERNAME`
+- `CONFLUENCE_USERNAME`
+
+这两个通常都填你的 Atlassian 账号邮箱。
+
+- `JIRA_API_TOKEN`
+- `CONFLUENCE_API_TOKEN`
+
+这两个填 Atlassian Cloud API Token。  
+通常去 Atlassian 账号安全页创建：
+
+- `https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/`
+
+如果你的 Jira 和 Confluence 都属于同一个 Atlassian Cloud 账号，通常可以复用同一个 API Token。
+
+**Server / Data Center 认证字段**
+
+- `JIRA_PERSONAL_TOKEN`
+- `CONFLUENCE_PERSONAL_TOKEN`
+
+这两个填你在 Jira / Confluence 实例里创建的 Personal Access Token。  
+通常在各自产品的个人头像菜单或个人设置里找 `Personal access tokens`。
+
+如果你在界面里找不到这个入口，常见原因有两种：
+
+- 你的实例没有开启 PAT
+- 你的管理员禁用了 PAT
+
+这种情况就需要找管理员确认。
+
+**SSL 校验字段**
+
+- `JIRA_SSL_VERIFY`
+- `CONFLUENCE_SSL_VERIFY`
+
+默认建议填 `"true"`。  
+只有在公司内网、自签名证书、或你明确知道证书校验会失败时，才临时改成 `"false"`。
+
+**兼容别名**
+
+- `JIRA_TOKEN` 可以作为 `JIRA_API_TOKEN` 的别名
+- `CONFLUENCE_TOKEN` 可以作为 `CONFLUENCE_API_TOKEN` 的别名
+
+如果你之前已经有 MCP 风格的旧环境变量，可以继续沿用这两个名字。
+
 如果希望每次开终端自动生效，把下面这段加到 `~/.zshrc`：
 
 ```bash
