@@ -1,0 +1,4 @@
+interface:
+  display_name: "Atlassian CLI"
+  short_description: "Direct Jira and Confluence CLI wrapper."
+  default_prompt: "Use $atlassian-cli-skill to operate Jira or Confluence through the local atlassian-cli command."
