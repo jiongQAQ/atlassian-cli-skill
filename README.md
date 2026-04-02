@@ -16,10 +16,11 @@ Skill 负责把常见工作流封装好，例如：
 ```text
 .
 ├── README.md
-├── .atlassian-cli.env.example
 └── atlassian-cli-skill/
     ├── SKILL.md
     ├── agents/openai.yaml
+    ├── assets/
+    │   └── .atlassian-cli.env.example
     └── scripts/
         ├── ensure_atlassian_cli.sh
         ├── run_atlassian_cli.sh
@@ -113,10 +114,10 @@ uv tool install git+https://github.com/jiongQAQ/cli-atlassian
 
 推荐把认证信息放进 `~/.atlassian-cli.env`，不要直接写进命令行。
 
-可以复制模板：
+可以直接从 skill 自带模板复制：
 
 ```bash
-cp ./.atlassian-cli.env.example ~/.atlassian-cli.env
+cp ./atlassian-cli-skill/assets/.atlassian-cli.env.example ~/.atlassian-cli.env
 chmod 600 ~/.atlassian-cli.env
 ```
 

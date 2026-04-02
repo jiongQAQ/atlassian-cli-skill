@@ -89,12 +89,14 @@ python3 scripts/confluence_markdown_page.py update 544882063 ./design.md --dry-r
 ## Verification
 
 - Run a `--help` command first if the environment is uncertain.
+- Seed `~/.atlassian-cli.env` from `assets/.atlassian-cli.env.example` when the user has not prepared credentials yet.
 - Use `--json` on read or search commands when the result will be parsed.
 - After create or update operations, read the target issue or page back and verify the critical fields.
 - Keep secrets in `~/.atlassian-cli.env`; do not embed tokens or internal URLs into the skill files.
 
 ## Resources
 
+- `assets/.atlassian-cli.env.example`: Copy this file to `~/.atlassian-cli.env` and fill in the user's real Jira and Confluence credentials.
 - `scripts/ensure_atlassian_cli.sh`: Install `atlassian-cli` automatically through `uv` when the command is missing.
 - `scripts/run_atlassian_cli.sh`: Load `~/.atlassian-cli.env` if present, then execute `atlassian-cli`.
 - `scripts/confluence_markdown_page.py`: Create or update a Confluence page from Markdown with title extraction and H1 stripping.
