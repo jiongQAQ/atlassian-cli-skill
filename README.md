@@ -1,15 +1,21 @@
 # atlassian-cli-skill
 
-一个给 AI Agent 用的 Confluence Skill。  
-它内部通过 `atlassian-cli` 调用 Confluence，但正常使用时不需要人手动去敲 CLI。
+`atlassian-cli-skill` is a reusable skill package for AI agents that need to operate Confluence from the terminal.
 
-这个 skill 负责把常见工作流封装好，例如：
+This repository distributes one installable skill directory, `atlassian-cli-skill/`. The skill uses the local `atlassian-cli` command as its execution backend and can bootstrap that CLI automatically on first use.
 
-- 读取 Confluence 页面
-- 搜索 Confluence 页面
-- 从本地 Markdown 创建或更新 Confluence 页面
+## What It Does
 
-## 仓库结构
+After installation, the skill can help an AI agent:
+
+- read a Confluence page
+- search Confluence pages
+- create a Confluence page from Markdown
+- update an existing Confluence page from Markdown
+
+This repository does not package an MCP server. The skill is intended for environments that support local skills, such as Claude Code or Codex-compatible setups.
+
+## Repository Layout
 
 ```text
 .
@@ -17,33 +23,26 @@
 └── atlassian-cli-skill/
     ├── SKILL.md
     ├── agents/openai.yaml
-    ├── assets/
-    │   └── .atlassian-cli.env.example
+    ├── assets/.atlassian-cli.env.example
     └── scripts/
         ├── ensure_atlassian_cli.sh
         ├── run_atlassian_cli.sh
         └── confluence_markdown_page.py
 ```
 
-真正的 skill 内容在 `atlassian-cli-skill/` 目录下。
+The actual skill content lives in `atlassian-cli-skill/`.
 
-## 前置条件
+## Requirements
 
-### 1. 安装 Skill
+- a skill-capable agent environment, such as Claude Code or Codex
+- `uv` available on `PATH`
+- a working Confluence account and API credential
 
-有两种推荐方式。
+## Installation
 
-#### 方式 A：通过 `skill-installer` 从 GitHub 安装
+### Install with `skill-installer`
 
-如果你的环境已经有系统自带的 `skill-installer`，可以直接在 Agent 里说：
-
-```text
-使用 $skill-installer 从 GitHub 安装 jiongQAQ/atlassian-cli-skill 里的 atlassian-cli-skill
-```
-
-也可以直接运行安装脚本。
-
-安装到 Claude skills 目录：
+Install to `~/.claude/skills`:
 
 ```bash
 python3 ~/.claude/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -52,7 +51,7 @@ python3 ~/.claude/skills/.system/skill-installer/scripts/install-skill-from-gith
   --dest ~/.claude/skills
 ```
 
-安装到 Codex skills 目录：
+Install to `~/.codex/skills`:
 
 ```bash
 python3 ~/.claude/skills/.system/skill-installer/scripts/install-skill-from-github.py \
@@ -61,92 +60,67 @@ python3 ~/.claude/skills/.system/skill-installer/scripts/install-skill-from-gith
   --dest ~/.codex/skills
 ```
 
-#### 方式 B：手动复制或软链
+### Install manually
 
-复制到 Claude：
+Copy:
 
 ```bash
 cp -R ./atlassian-cli-skill ~/.claude/skills/
-```
-
-复制到 Codex：
-
-```bash
 cp -R ./atlassian-cli-skill ~/.codex/skills/
 ```
 
-或者直接做软链：
+Or symlink:
 
 ```bash
 ln -s "$(pwd)/atlassian-cli-skill" ~/.claude/skills/atlassian-cli-skill
 ln -s "$(pwd)/atlassian-cli-skill" ~/.codex/skills/atlassian-cli-skill
 ```
 
-安装后重启 Claude / Codex，使 skill 被重新发现。
+Restart the agent after installation so the skill can be discovered again.
 
-### 2. 准备环境变量
+## Configuration
 
-推荐把认证信息放进 `~/.atlassian-cli.env`，不要直接写进命令行。
-
-可以直接从 skill 自带模板复制：
+Copy the example environment file:
 
 ```bash
 cp ./atlassian-cli-skill/assets/.atlassian-cli.env.example ~/.atlassian-cli.env
 chmod 600 ~/.atlassian-cli.env
 ```
 
-然后按你的实际环境填写。
+Then fill in the required values.
 
-#### 这些字段分别填什么
+### Required variables
 
 - `CONFLUENCE_URL`
-  填你的 Confluence 根地址。
-  Cloud 一般是 `https://your-domain.atlassian.net/wiki`
-  Server / Data Center 一般是你公司自己的 Confluence 地址，例如 `https://wiki.example.com`
+  The base URL of your Confluence instance. This is usually visible in the browser address bar.
+- `CONFLUENCE_SSL_VERIFY`
+  Set to `"true"` by default. Set to `"false"` only if your environment uses self-signed or otherwise untrusted certificates.
 
-这个值通常直接从浏览器地址栏就能拿到。
-
-**Cloud 认证字段**
+### Cloud authentication
 
 - `CONFLUENCE_USERNAME`
-
-通常填你的 Atlassian 账号邮箱。
-
+  Your Atlassian account email.
 - `CONFLUENCE_API_TOKEN`
+  Your Atlassian Cloud API token.
 
-填 Atlassian Cloud API Token。  
-通常去 Atlassian 账号安全页创建：
+Token creation guide:
+- <https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/>
 
-- `https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/`
-
-**Server / Data Center 认证字段**
+### Server / Data Center authentication
 
 - `CONFLUENCE_PERSONAL_TOKEN`
+  A Confluence personal access token from your profile or personal settings.
 
-填你在 Confluence 实例里创建的 Personal Access Token。  
-通常在产品的个人头像菜单或个人设置里找 `Personal access tokens`。
+If your instance does not show a personal access token entry, ask the administrator whether PAT is enabled.
 
-如果你在界面里找不到这个入口，常见原因有两种：
+### Optional compatibility alias
 
-- 你的实例没有开启 PAT
-- 你的管理员禁用了 PAT
+- `CONFLUENCE_TOKEN`
+  Supported as an alias for `CONFLUENCE_API_TOKEN`.
 
-这种情况就需要找管理员确认。
+### Optional shell auto-load
 
-**SSL 校验字段**
-
-- `CONFLUENCE_SSL_VERIFY`
-
-默认建议填 `"true"`。  
-只有在公司内网、自签名证书、或你明确知道证书校验会失败时，才临时改成 `"false"`。
-
-**兼容别名**
-
-- `CONFLUENCE_TOKEN` 可以作为 `CONFLUENCE_API_TOKEN` 的别名
-
-如果你之前已经有 MCP 风格的旧环境变量，可以继续沿用这个名字。
-
-如果希望每次开终端自动生效，把下面这段加到 `~/.zshrc`：
+To load the file automatically in new shells:
 
 ```bash
 if [ -f "$HOME/.atlassian-cli.env" ]; then
@@ -154,58 +128,30 @@ if [ -f "$HOME/.atlassian-cli.env" ]; then
 fi
 ```
 
-## 如何使用
+## Usage
 
-### 1. 在 Agent 中显式调用 Skill
-
-直接在提示词中引用：
-
-```text
-使用 $atlassian-cli-skill 去操作 Confluence 页面
-使用 $atlassian-cli-skill 把本地 Markdown 更新到指定 Confluence 页面
-```
-
-更完整一点的自然语言示例：
+Use the skill explicitly in the agent prompt:
 
 ```text
 使用 $atlassian-cli-skill 读取 pageId=544882063 的 Confluence 页面
-使用 $atlassian-cli-skill 把本地 design.md 更新到 Confluence 页面 544882063
 使用 $atlassian-cli-skill 搜索标题里包含“接口设计”的 Confluence 页面
+使用 $atlassian-cli-skill 把本地 design.md 更新到 Confluence 页面 544882063
 ```
 
-### 2. Skill 内部做了什么
+On first use, the skill:
 
-你不需要手动运行 `atlassian-cli`。  
-当 AI 使用这个 skill 时，它会：
+1. checks whether `atlassian-cli` is installed
+2. installs it through `uv` if needed
+3. loads `~/.atlassian-cli.env`
+4. executes the Confluence operation through the local CLI
 
-- 检查本机是否已经安装 `atlassian-cli`
-- 如果缺失，则自动通过 `uv` 安装 `cli-atlassian`
-- 读取 `~/.atlassian-cli.env`
-- 用本地 CLI 去执行 Confluence 的真实读写操作
-- 在需要时，用内置脚本把本地 Markdown 转成 Confluence 页面更新命令
+## Scope
 
-所以从使用者视角，重点只有两件事：
+This skill is intentionally limited to Confluence.
 
-- 装好 skill
-- 配好 `~/.atlassian-cli.env`
+- the skill expects credentials to be managed outside the repository
+- the public repository only contains placeholder configuration values
 
-## 适用场景
+## Related Project
 
-适合下面这些情况：
-
-- 想通过“安装 skill”的方式直接获得 Confluence 操作能力
-- 希望 skill 首次运行时自动补装 `atlassian-cli`
-- 不想启动 `mcp-atlassian` server
-- 想让 AI 直接去读写 Confluence
-- 想把“本地 Markdown -> Confluence 页面”固定成一个 AI 可复用流程
-
-## 安全说明
-
-- 不要把真实 token、邮箱、内网地址提交到仓库
-- 认证信息只放在 `~/.atlassian-cli.env`
-- 公开仓库里的示例配置必须使用占位值
-
-## 关联项目
-
-- CLI 实现：<https://github.com/jiongQAQ/cli-atlassian>
-- 本仓库：<https://github.com/jiongQAQ/atlassian-cli-skill>
+- CLI backend: <https://github.com/jiongQAQ/cli-atlassian>
