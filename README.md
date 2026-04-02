@@ -33,21 +33,58 @@ Skill 负责把常见工作流封装好，例如：
 
 ### 1. 安装 Skill
 
-如果你在 Codex 里使用 `skill-installer`，可以直接从 GitHub 安装这个 skill：
+有两种推荐方式。
 
-```bash
-python /path/to/skill-installer/scripts/install-skill-from-github.py \
-  --repo jiongQAQ/atlassian-cli-skill \
-  --path atlassian-cli-skill
+#### 方式 A：通过 `skill-installer` 从 GitHub 安装
+
+如果你的环境已经有系统自带的 `skill-installer`，可以直接在 Agent 里说：
+
+```text
+使用 $skill-installer 从 GitHub 安装 jiongQAQ/atlassian-cli-skill 里的 atlassian-cli-skill
 ```
 
-或者手动复制：
+也可以直接运行安装脚本。
+
+安装到 Claude skills 目录：
+
+```bash
+python3 ~/.claude/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo jiongQAQ/atlassian-cli-skill \
+  --path atlassian-cli-skill \
+  --dest ~/.claude/skills
+```
+
+安装到 Codex skills 目录：
+
+```bash
+python3 ~/.claude/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo jiongQAQ/atlassian-cli-skill \
+  --path atlassian-cli-skill \
+  --dest ~/.codex/skills
+```
+
+#### 方式 B：手动复制或软链
+
+复制到 Claude：
 
 ```bash
 cp -R ./atlassian-cli-skill ~/.claude/skills/
 ```
 
-安装后重启你的 Agent，使 skill 被重新发现。
+复制到 Codex：
+
+```bash
+cp -R ./atlassian-cli-skill ~/.codex/skills/
+```
+
+或者直接做软链：
+
+```bash
+ln -s "$(pwd)/atlassian-cli-skill" ~/.claude/skills/atlassian-cli-skill
+ln -s "$(pwd)/atlassian-cli-skill" ~/.codex/skills/atlassian-cli-skill
+```
+
+安装后重启 Claude / Codex，使 skill 被重新发现。
 
 ### 2. 自动安装 `atlassian-cli`
 
@@ -103,6 +140,14 @@ fi
 使用 $atlassian-cli-skill 去操作 Confluence 页面
 使用 $atlassian-cli-skill 把本地 Markdown 更新到指定 Confluence 页面
 使用 $atlassian-cli-skill 搜索 Jira 中最近更新的 issue
+```
+
+更完整一点的自然语言示例：
+
+```text
+使用 $atlassian-cli-skill 读取 pageId=544882063 的 Confluence 页面
+使用 $atlassian-cli-skill 把本地 design.md 更新到 Confluence 页面 544882063
+使用 $atlassian-cli-skill 搜索 Jira 里 project = DEMO 最近 20 条更新
 ```
 
 ### 2. 直接运行 Skill 自带脚本
