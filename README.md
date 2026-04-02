@@ -1,13 +1,12 @@
 # atlassian-cli-skill
 
-一个给 AI Agent 用的 Atlassian Skill。  
-它内部通过 `atlassian-cli` 调用 Jira 和 Confluence，但正常使用时不需要人手动去敲 CLI。
+一个给 AI Agent 用的 Confluence Skill。  
+它内部通过 `atlassian-cli` 调用 Confluence，但正常使用时不需要人手动去敲 CLI。
 
 这个 skill 负责把常见工作流封装好，例如：
 
-- 读取 Jira issue / Confluence 页面
-- 搜索 Jira / Confluence
-- 创建或更新 Jira issue
+- 读取 Confluence 页面
+- 搜索 Confluence 页面
 - 从本地 Markdown 创建或更新 Confluence 页面
 
 ## 仓库结构
@@ -100,43 +99,32 @@ chmod 600 ~/.atlassian-cli.env
 
 #### 这些字段分别填什么
 
-**Jira / Confluence 地址**
-
-- `JIRA_URL`
-  填你的 Jira 根地址。
-  Cloud 一般是 `https://your-domain.atlassian.net`
-  Server / Data Center 一般是你公司自己的 Jira 地址，例如 `https://jira.example.com`
 - `CONFLUENCE_URL`
   填你的 Confluence 根地址。
   Cloud 一般是 `https://your-domain.atlassian.net/wiki`
   Server / Data Center 一般是你公司自己的 Confluence 地址，例如 `https://wiki.example.com`
 
-这两个值通常直接从浏览器地址栏就能拿到。
+这个值通常直接从浏览器地址栏就能拿到。
 
 **Cloud 认证字段**
 
-- `JIRA_USERNAME`
 - `CONFLUENCE_USERNAME`
 
-这两个通常都填你的 Atlassian 账号邮箱。
+通常填你的 Atlassian 账号邮箱。
 
-- `JIRA_API_TOKEN`
 - `CONFLUENCE_API_TOKEN`
 
-这两个填 Atlassian Cloud API Token。  
+填 Atlassian Cloud API Token。  
 通常去 Atlassian 账号安全页创建：
 
 - `https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/`
 
-如果你的 Jira 和 Confluence 都属于同一个 Atlassian Cloud 账号，通常可以复用同一个 API Token。
-
 **Server / Data Center 认证字段**
 
-- `JIRA_PERSONAL_TOKEN`
 - `CONFLUENCE_PERSONAL_TOKEN`
 
-这两个填你在 Jira / Confluence 实例里创建的 Personal Access Token。  
-通常在各自产品的个人头像菜单或个人设置里找 `Personal access tokens`。
+填你在 Confluence 实例里创建的 Personal Access Token。  
+通常在产品的个人头像菜单或个人设置里找 `Personal access tokens`。
 
 如果你在界面里找不到这个入口，常见原因有两种：
 
@@ -147,7 +135,6 @@ chmod 600 ~/.atlassian-cli.env
 
 **SSL 校验字段**
 
-- `JIRA_SSL_VERIFY`
 - `CONFLUENCE_SSL_VERIFY`
 
 默认建议填 `"true"`。  
@@ -155,10 +142,9 @@ chmod 600 ~/.atlassian-cli.env
 
 **兼容别名**
 
-- `JIRA_TOKEN` 可以作为 `JIRA_API_TOKEN` 的别名
 - `CONFLUENCE_TOKEN` 可以作为 `CONFLUENCE_API_TOKEN` 的别名
 
-如果你之前已经有 MCP 风格的旧环境变量，可以继续沿用这两个名字。
+如果你之前已经有 MCP 风格的旧环境变量，可以继续沿用这个名字。
 
 如果希望每次开终端自动生效，把下面这段加到 `~/.zshrc`：
 
@@ -177,7 +163,6 @@ fi
 ```text
 使用 $atlassian-cli-skill 去操作 Confluence 页面
 使用 $atlassian-cli-skill 把本地 Markdown 更新到指定 Confluence 页面
-使用 $atlassian-cli-skill 搜索 Jira 中最近更新的 issue
 ```
 
 更完整一点的自然语言示例：
@@ -185,7 +170,7 @@ fi
 ```text
 使用 $atlassian-cli-skill 读取 pageId=544882063 的 Confluence 页面
 使用 $atlassian-cli-skill 把本地 design.md 更新到 Confluence 页面 544882063
-使用 $atlassian-cli-skill 搜索 Jira 里 project = DEMO 最近 20 条更新
+使用 $atlassian-cli-skill 搜索标题里包含“接口设计”的 Confluence 页面
 ```
 
 ### 2. Skill 内部做了什么
@@ -196,7 +181,7 @@ fi
 - 检查本机是否已经安装 `atlassian-cli`
 - 如果缺失，则自动通过 `uv` 安装 `cli-atlassian`
 - 读取 `~/.atlassian-cli.env`
-- 用本地 CLI 去执行 Jira / Confluence 的真实读写操作
+- 用本地 CLI 去执行 Confluence 的真实读写操作
 - 在需要时，用内置脚本把本地 Markdown 转成 Confluence 页面更新命令
 
 所以从使用者视角，重点只有两件事：
@@ -208,10 +193,10 @@ fi
 
 适合下面这些情况：
 
-- 想通过“安装 skill”的方式直接获得 Jira / Confluence 操作能力
+- 想通过“安装 skill”的方式直接获得 Confluence 操作能力
 - 希望 skill 首次运行时自动补装 `atlassian-cli`
 - 不想启动 `mcp-atlassian` server
-- 想让 AI 直接去读写 Jira / Confluence
+- 想让 AI 直接去读写 Confluence
 - 想把“本地 Markdown -> Confluence 页面”固定成一个 AI 可复用流程
 
 ## 安全说明

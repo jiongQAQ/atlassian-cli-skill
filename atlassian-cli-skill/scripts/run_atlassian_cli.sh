@@ -18,4 +18,9 @@ if [[ -f "$ENV_FILE" ]]; then
   source "$ENV_FILE"
 fi
 
+if [[ "${1:-}" == "jira" ]]; then
+  printf '%s\n' "atlassian-cli-skill only supports Confluence operations." >&2
+  exit 2
+fi
+
 exec atlassian-cli "$@"
